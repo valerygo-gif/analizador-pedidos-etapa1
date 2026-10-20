@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Analizador Léxico de Pedidos</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+
+<body>
+
+    <main class="contenedor">
+
+        <!-- ENCABEZADO -->
+        <header class="encabezado">
+
+            <div class="marca">
+                <div class="icono-principal">📦</div>
+
+                <div>
+                    <p class="etapa">TEORÍA DE LA COMPUTACIÓN · ETAPA 1</p>
+
+                    <h1>Analizador Léxico de Pedidos</h1>
+
+                    <p class="descripcion">
+                        Validación inicial de cadenas estructuradas para
+                        el registro de pedidos comerciales.
+                    </p>
+                </div>
+            </div>
+
+        </header>
+
+
+        <!-- INFORMACIÓN DEL PROYECTO -->
+        <section class="proyecto">
+
+            <div class="proyecto-icono">💻</div>
+
+            <div>
+                <h2>Proyecto</h2>
+
+                <p>
+                    Implementación de un analizador léxico-sintáctico
+                    para reducir errores de registro de pedidos
+                    en una empresa comercial de Lima.
+                </p>
+            </div>
+
+        </section>
+
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <section class="grid-principal">
+
+            <!-- PANEL DE ENTRADA -->
+            <div class="tarjeta">
+
+                <div class="titulo-tarjeta">
+                    <div class="numero">1</div>
+
+                    <div>
+                        <h2>Ingresar lenguaje</h2>
+                        <p>Introduce una cadena o carga un archivo TXT.</p>
+                    </div>
+                </div>
+
+
+                <form method="POST" enctype="multipart/form-data">
+
+                    <label class="label">
+                        Escribir cadena directamente
+                    </label>
+
+                    <textarea
+                        name="texto"
+                        placeholder="PEDIDO P001 CLIENTE C001 PRODUCTO PR023 CANTIDAD 2 PAGO TARJETA ;"
+                    >{{ texto }}</textarea>
+
+
+                    <div class="separador">
+                        <span>O</span>
+                    </div>
+
+
+                    <label class="label">
+                        Cargar archivo .txt
+                    </label>
+
+                    <div class="carga-archivo">
+
+                        <span class="icono-archivo">📄</span>
+
+                        <div>
+                            <strong>Selecciona tu archivo</strong>
+                            <p>Formato permitido: TXT</p>
+                        </div>
+
+                        <input
+                            type="file"
+                            name="archivo"
+                            accept=".txt"
+                        >
+
+                    </div>
+
+
+                    <button type="submit" class="boton-analizar">
+                        🔍 Analizar cadena
+                    </button>
+
+                </form>
+
+
+                <!-- EJEMPLO -->
+                <div class="ejemplo">
+
+                    <div class="ejemplo-titulo">
+                        <span>💡</span>
+                        <strong>Ejemplo de entrada</strong>
+                    </div>
+
+                    <code>
+PEDIDO P001 CLIENTE C001 PRODUCTO PR023 CANTIDAD 2 PAGO TARJETA ;
+                    </code>
+
+                </div>
+
+            </div>
+
+
+            <!-- PANEL DERECHO -->
+            <div class="tarjeta resultado">
+
+                <div class="titulo-tarjeta">
+
+                    <div class="numero numero-secundario">2</div>
+
+                    <div>
+                        <h2>Análisis léxico</h2>
+                        <p>
+                            Identificación de los tokens y lexemas
+                            reconocidos en la cadena.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                {% if resultados %}
+
+                    <div class="estado correcto">
+                        ✓ Análisis realizado correctamente
+                    </div>
+
+
+                    <div class="tabla-contenedor">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>N.º</th>
+                                    <th>Token</th>
+                                    <th>Lexema</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for resultado in resultados %}
+
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+
+                                    <td>
+                                        <span class="token">
+                                            {{ resultado.token }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="lexema">
+                                            {{ resultado.lexema }}
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="estado-vacio">
+
+                        <div class="icono-vacio">⌨️</div>
+
+                        <h3>Esperando una entrada</h3>
+
+                        <p>
+                            Escribe una cadena o carga un archivo
+                            y presiona <strong>Analizar cadena</strong>.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- FLUJO -->
+        <section class="flujo">
+
+            <div>
+                <span>1</span>
+                Ingreso
+            </div>
+
+            <p>→</p>
+
+            <div>
+                <span>2</span>
+                Tokenización
+            </div>
+
+            <p>→</p>
+
+            <div>
+                <span>3</span>
+                Identificación
+            </div>
+
+            <p>→</p>
+
+            <div>
+                <span>4</span>
+                Resultado
+            </div>
+
+        </section>
+
+
+        <footer>
+            Etapa 1 · Análisis léxico · Teoría de la Computación
+        </footer>
+
+    </main>
+
+</body>
+
+</html>
