@@ -6,814 +6,742 @@
     <title>Analizador Léxico-Sintáctico de Reglas de Pedidos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
 </head>
+
 <body>
 
-    <main class="contenedor">
+<main class="contenedor">
 
-        <header class="cabecera">
-            <div class="icono-principal">⚙️</div>
+    <header class="cabecera">
 
-            <div>
-                <p class="etapa">TEORÍA DE LA COMPUTACIÓN · ETAPA 2</p>
+        <div class="icono-principal">⚙️</div>
 
-                <h1>Analizador Léxico-Sintáctico de Reglas de Pedidos</h1>
-
-                <p>
-                    Mini lenguaje de reglas, expresiones regulares,
-                    AFND, AFD, tablas de transición y quíntuplas.
-                </p>
-            </div>
-        </header>
-
-
-        <section class="tarjeta proyecto">
-
-            <div class="icono-proyecto">💻</div>
-
-            <div>
-                <strong>Proyecto</strong>
-
-                <p>
-                    Implementación de un analizador léxico-sintáctico
-                    para un lenguaje de reglas de validación de pedidos
-                    en una empresa comercial de Lima.
-                </p>
-            </div>
-
-        </section>
-
-
-        <section class="contexto">
-
-            <h2>¿Dónde se aplica nuestro analizador?</h2>
-
-            <p>
-                El operario continúa registrando los pedidos mediante
-                el sistema habitual de la empresa. El analizador no es
-                utilizado directamente por el operario, sino que funciona
-                como una herramienta interna para procesar reglas definidas
-                mediante un mini lenguaje formal.
+        <div>
+            <p class="etapa">
+                TEORÍA DE LA COMPUTACIÓN · ETAPA 2
             </p>
 
+            <h1>
+                Analizador Léxico-Sintáctico de un Lenguaje de Reglas de Pedidos
+            </h1>
+
             <p>
-                Estas reglas pueden ser administradas por el área de
-                Soporte TI y permiten expresar condiciones relacionadas
-                con los pedidos antes de integrarlas posteriormente
-                al sistema.
+                Análisis léxico, sintáctico y generación de autómatas.
             </p>
+        </div>
 
-            <div class="flujo-proceso">
-
-                <span>Administrador / Soporte TI</span>
-
-                <b>→</b>
-
-                <span>Regla textual</span>
-
-                <b>→</b>
-
-                <span>Analizador léxico-sintáctico</span>
-
-                <b>→</b>
-
-                <span>Regla estructurada</span>
-
-                <b>→</b>
-
-                <span>Integración futura al sistema</span>
-
-            </div>
-
-        </section>
+    </header>
 
 
-        <section class="grid-principal">
+    <section class="tarjeta proyecto">
 
-            <div class="tarjeta entrada">
+        <div class="icono-proyecto">💻</div>
 
-                <div class="titulo-paso">
+        <div>
+            <strong>Proyecto</strong>
 
-                    <span class="numero morado">1</span>
+            <p>
+                Mini lenguaje para definir y validar reglas
+                relacionadas con el proceso de pedidos.
+            </p>
+        </div>
 
-                    <div>
-                        <h2>Ingresar regla</h2>
-
-                        <p>
-                            Escribe una regla del mini lenguaje
-                            o carga un archivo TXT.
-                        </p>
-                    </div>
-
-                </div>
+    </section>
 
 
-                <form method="POST" enctype="multipart/form-data">
+    <section class="contexto">
 
-                    <label for="texto">
-                        Escribir regla directamente
-                    </label>
+        <h2>Aplicación dentro de la empresa</h2>
 
-                    <textarea
-                        id="texto"
-                        name="texto"
-                        rows="7"
-                        placeholder="REGLA R001 SI TOTAL > 5000 ENTONCES AUTORIZAR SUPERVISOR ;"
-                    >{{ texto }}</textarea>
+        <div class="flujo-proceso">
 
+            <span>Soporte TI</span>
 
-                    <div class="separador">O</div>
+            <b>→</b>
 
+            <span>Regla</span>
 
-                    <label for="archivo">
-                        Cargar archivo .txt
-                    </label>
+            <b>→</b>
 
-                    <input
-                        id="archivo"
-                        type="file"
-                        name="archivo"
-                        accept=".txt"
-                    >
+            <span>Analizador</span>
 
+            <b>→</b>
 
-                    <button type="submit">
-                        🔎 Analizar regla
-                    </button>
+            <span>Regla validada</span>
 
-                </form>
+            <b>→</b>
+
+            <span>Sistema de pedidos</span>
+
+        </div>
+
+    </section>
 
 
-                <div class="ejemplo">
+    <section class="grid-principal">
 
-                    <strong>💡 Ejemplo de entrada</strong>
+        <div class="tarjeta entrada">
 
-                    <code>
-                        REGLA R001 SI TOTAL &gt; 5000
-                        ENTONCES AUTORIZAR SUPERVISOR ;
-                    </code>
+            <div class="titulo-paso">
 
+                <span class="numero morado">
+                    1
+                </span>
+
+                <div>
+                    <h2>Ingresar regla</h2>
+
+                    <p>
+                        Escribe una regla o carga un archivo TXT.
+                    </p>
                 </div>
 
             </div>
 
 
-            <div class="tarjeta resultados">
+            <form method="POST" enctype="multipart/form-data">
 
-                <div class="titulo-paso">
+                <label for="texto">
+                    Regla
+                </label>
 
-                    <span class="numero naranja">2</span>
+                <textarea
+                    id="texto"
+                    name="texto"
+                    rows="6"
+                    placeholder="REGLA R001 SI TOTAL > 5000 ENTONCES AUTORIZAR SUPERVISOR ;"
+                >{{ texto }}</textarea>
 
-                    <div>
-                        <h2>Análisis léxico</h2>
 
-                        <p>
-                            Reconocimiento de lexemas,
-                            tokens y expresiones regulares.
-                        </p>
-                    </div>
-
+                <div class="separador">
+                    O
                 </div>
 
 
-                {% if resultados %}
+                <label for="archivo">
+                    Archivo .txt
+                </label>
 
-                    {% if tiene_errores_lexicos %}
-
-                        <div class="mensaje error">
-                            ✕ Se encontraron errores léxicos.
-                        </div>
-
-                    {% else %}
-
-                        <div class="mensaje exito">
-                            ✓ Análisis léxico realizado correctamente.
-                        </div>
-
-                    {% endif %}
+                <input
+                    id="archivo"
+                    type="file"
+                    name="archivo"
+                    accept=".txt"
+                >
 
 
-                    <div class="tabla-scroll">
+                <button type="submit">
+                    🔎 Analizar regla
+                </button>
 
-                        <table>
-
-                            <thead>
-
-                                <tr>
-                                    <th>N.º</th>
-                                    <th>Lexema</th>
-                                    <th>Token</th>
-                                    <th>Expresión regular</th>
-                                </tr>
-
-                            </thead>
+            </form>
 
 
-                            <tbody>
+            <div class="ejemplo">
 
-                                {% for resultado in resultados %}
+                <strong>
+                    💡 Ejemplo
+                </strong>
 
-                                    <tr>
+                <code>
+                    REGLA R001 SI TOTAL &gt; 5000
+                    ENTONCES AUTORIZAR SUPERVISOR ;
+                </code>
 
-                                        <td>
-                                            {{ resultado.posicion }}
-                                        </td>
+            </div>
 
-                                        <td>
-                                            <code>
-                                                {{ resultado.lexema }}
-                                            </code>
-                                        </td>
+        </div>
 
-                                        <td>
-                                            <span class="token">
-                                                {{ resultado.token }}
-                                            </span>
-                                        </td>
 
-                                        <td>
-                                            <code>
-                                                {{ resultado.expresion }}
-                                            </code>
-                                        </td>
+        <div class="tarjeta resultados">
 
-                                    </tr>
+            <div class="titulo-paso">
 
-                                {% endfor %}
+                <span class="numero naranja">
+                    2
+                </span>
 
-                            </tbody>
+                <div>
+                    <h2>Análisis léxico</h2>
 
-                        </table>
+                    <p>
+                        Lexemas, tokens y expresiones regulares.
+                    </p>
+                </div>
 
+            </div>
+
+
+            {% if resultados %}
+
+                {% if tiene_errores_lexicos %}
+
+                    <div class="mensaje error">
+                        ✕ Se encontraron errores léxicos.
                     </div>
 
                 {% else %}
 
-                    <div class="vacio">
-                        Ingresa una regla para comenzar el análisis.
+                    <div class="mensaje exito">
+                        ✓ Análisis léxico correcto.
                     </div>
 
                 {% endif %}
 
-            </div>
 
-        </section>
+                <div class="tabla-scroll">
 
+                    <table>
 
-        {% if sintaxis %}
+                        <thead>
 
-        <section class="tarjeta sintaxis">
+                            <tr>
+                                <th>N.º</th>
+                                <th>Lexema</th>
+                                <th>Token</th>
+                                <th>Expresión regular</th>
+                            </tr>
 
-            <div class="titulo-paso">
-
-                <span class="numero verde">3</span>
-
-                <div>
-                    <h2>Análisis sintáctico</h2>
-
-                    <p>
-                        Verificación del orden de los tokens
-                        según la gramática del mini lenguaje.
-                    </p>
-                </div>
-
-            </div>
+                        </thead>
 
 
-            {% if sintaxis.valida %}
+                        <tbody>
 
-                <div class="mensaje exito">
-                    ✓ {{ sintaxis.mensaje }}
-                </div>
+                            {% for resultado in resultados %}
 
+                                <tr>
 
-                <div class="representacion">
+                                    <td>
+                                        {{ resultado.posicion }}
+                                    </td>
 
-                    <h3>
-                        Representación estructurada obtenida
-                    </h3>
+                                    <td>
+                                        <code>
+                                            {{ resultado.lexema }}
+                                        </code>
+                                    </td>
 
-                    <p>
-                        Después del análisis léxico y sintáctico,
-                        la regla queda organizada internamente
-                        en una estructura que puede utilizarse
-                        posteriormente en una etapa de traducción.
-                    </p>
+                                    <td>
+                                        <span class="token">
+                                            {{ resultado.token }}
+                                        </span>
+                                    </td>
 
-                    <pre>ID DE REGLA: {{ sintaxis.representacion.id_regla }}
+                                    <td>
+                                        <code>
+                                            {{ resultado.expresion }}
+                                        </code>
+                                    </td>
 
-CONDICIÓN:
-  campo: {{ sintaxis.representacion.condicion.campo }}
-  operador: {{ sintaxis.representacion.condicion.operador }}
-  valor: {{ sintaxis.representacion.condicion.valor }}
+                                </tr>
 
-ACCIÓN:
-  tipo: {{ sintaxis.representacion.accion.tipo }}
-  destino: {{ sintaxis.representacion.accion.destino }}</pre>
+                            {% endfor %}
 
-                </div>
+                        </tbody>
 
-
-                <div class="traduccion-futura">
-
-                    <h3>¿Qué ocurriría después?</h3>
-
-                    <p>
-                        En una implementación completa de un compilador,
-                        esta representación podría pasar a una siguiente
-                        etapa y traducirse a instrucciones o reglas
-                        utilizadas por el sistema empresarial.
-                    </p>
-
-                    <div class="mini-flujo">
-
-                        <span>Lenguaje propio</span>
-
-                        <b>→</b>
-
-                        <span>Análisis léxico</span>
-
-                        <b>→</b>
-
-                        <span>Análisis sintáctico</span>
-
-                        <b>→</b>
-
-                        <span>Representación estructurada</span>
-
-                        <b>→</b>
-
-                        <span>Traducción futura</span>
-
-                    </div>
+                    </table>
 
                 </div>
 
             {% else %}
 
-                <div class="mensaje error">
-                    ✕ {{ sintaxis.mensaje }}
+                <div class="vacio">
+                    Ingresa una regla para comenzar.
                 </div>
 
             {% endif %}
 
-        </section>
+        </div>
+
+    </section>
+
+
+    {% if sintaxis %}
+
+    <section class="tarjeta sintaxis">
+
+        <div class="titulo-paso">
+
+            <span class="numero verde">
+                3
+            </span>
+
+            <div>
+                <h2>Análisis sintáctico</h2>
+
+                <p>
+                    Verificación de la estructura de la regla.
+                </p>
+            </div>
+
+        </div>
+
+
+        {% if sintaxis.valida %}
+
+            <div class="mensaje exito">
+                ✓ Sintaxis correcta.
+            </div>
+
+
+            <div class="representacion">
+
+                <h3>
+                    Representación obtenida
+                </h3>
+
+                <pre>ID REGLA: {{ sintaxis.representacion.id_regla }}
+
+CONDICIÓN
+Campo: {{ sintaxis.representacion.condicion.campo }}
+Operador: {{ sintaxis.representacion.condicion.operador }}
+Valor: {{ sintaxis.representacion.condicion.valor }}
+
+ACCIÓN
+Tipo: {{ sintaxis.representacion.accion.tipo }}
+Destino: {{ sintaxis.representacion.accion.destino }}</pre>
+
+            </div>
+
+        {% else %}
+
+            <div class="mensaje error">
+                ✕ {{ sintaxis.mensaje }}
+            </div>
 
         {% endif %}
 
+    </section>
 
-        {% if automatas %}
+    {% endif %}
 
-        <section class="seccion-automatas">
 
-            <div class="encabezado-seccion">
+    {% if automatas %}
 
-                <span class="numero naranja">4</span>
+    <section class="seccion-automatas">
 
-                <div>
+        <div class="encabezado-seccion">
 
-                    <h2>
-                        Expresiones regulares y autómatas
-                    </h2>
+            <span class="numero naranja">
+                4
+            </span>
 
-                    <p>
-                        Desarrollo formal de cada tipo
-                        de token reconocido.
-                    </p>
+            <div>
+                <h2>
+                    Expresiones regulares y autómatas
+                </h2>
+
+                <p>
+                    Desarrollo de cada token.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="lista-automatas">
+
+            {% for automata in automatas %}
+
+            <details class="automata-card">
+
+                <summary class="resumen-automata">
+
+                    <span>
+                        {{ automata.token }}
+                    </span>
+
+                    <code>
+                        {{ automata.expresion }}
+                    </code>
+
+                    <span class="ver">
+                        Ver desarrollo
+                    </span>
+
+                </summary>
+
+
+                <div class="contenido-automata">
+
+
+                    <section class="paso-formal">
+
+                        <span class="paso-numero">
+                            4
+                        </span>
+
+                        <div>
+
+                            <h3>
+                                Expresión regular
+                            </h3>
+
+                            <p>
+                                <strong>Lexema:</strong>
+
+                                <code>
+                                    {{ automata.ejemplo }}
+                                </code>
+                            </p>
+
+                            <p>
+                                <strong>Token:</strong>
+                                {{ automata.token }}
+                            </p>
+
+                            <p>
+                                <strong>ER:</strong>
+
+                                <code>
+                                    {{ automata.expresion }}
+                                </code>
+                            </p>
+
+                        </div>
+
+                    </section>
+
+
+                    <section class="paso-formal separacion-formal">
+
+                        <span class="paso-numero">
+                            5
+                        </span>
+
+                        <div class="ancho-total">
+
+                            <h3>
+                                AFND
+                            </h3>
+
+                            <p>
+                                <strong>Inicial:</strong>
+                                {{ automata.afnd.inicial }}
+
+                                ·
+
+                                <strong>Final:</strong>
+                                {{ automata.afnd.finales|join(', ') }}
+                            </p>
+
+
+                            <div class="grafico-contenedor">
+
+                                {{ automata.afnd.svg|safe }}
+
+                            </div>
+
+
+                            <h4>
+                                Transiciones
+                            </h4>
+
+
+                            <div class="transiciones">
+
+                                {% for t in automata.afnd.transiciones_mostradas %}
+
+                                    <code>
+                                        {{ t.origen }}
+                                        -- {{ t.simbolo }} --&gt;
+                                        {{ t.destino }}
+                                    </code>
+
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <section class="paso-formal separacion-formal">
+
+                        <span class="paso-numero">
+                            6
+                        </span>
+
+                        <div class="ancho-total">
+
+                            <h3>
+                                Conversión AFND → AFD
+                            </h3>
+
+
+                            <div class="equivalencias">
+
+                                {% for eq in automata.afd.equivalencias %}
+
+                                    <code>
+                                        {{ eq.afd }}
+                                        =
+                                        {
+                                        {{ eq.afnd|join(', ') }}
+                                        }
+                                    </code>
+
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <section class="paso-formal separacion-formal">
+
+                        <span class="paso-numero">
+                            7
+                        </span>
+
+                        <div class="ancho-total">
+
+                            <h3>
+                                AFD y tabla de transición
+                            </h3>
+
+
+                            <div class="grafico-contenedor">
+
+                                {{ automata.afd.svg|safe }}
+
+                            </div>
+
+
+                            <div class="tabla-scroll">
+
+                                <table class="tabla-afd">
+
+                                    <thead>
+
+                                        <tr>
+
+                                            <th>
+                                                Estado
+                                            </th>
+
+                                            {% for columna in automata.afd.columnas %}
+
+                                                <th>
+                                                    {{ columna }}
+                                                </th>
+
+                                            {% endfor %}
+
+                                        </tr>
+
+                                    </thead>
+
+
+                                    <tbody>
+
+                                        {% for fila in automata.afd.tabla %}
+
+                                        <tr>
+
+                                            <td class="estado-tabla">
+
+                                                {% if fila.inicial %}
+                                                    →
+                                                {% endif %}
+
+                                                {% if fila.final %}
+                                                    *
+                                                {% endif %}
+
+                                                {{ fila.estado }}
+
+                                            </td>
+
+
+                                            {% for destino in fila.destinos %}
+
+                                                <td>
+                                                    {{ destino }}
+                                                </td>
+
+                                            {% endfor %}
+
+                                        </tr>
+
+                                        {% endfor %}
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+
+                            <p class="leyenda-estados">
+                                → inicial ·
+                                * final ·
+                                — sin transición
+                            </p>
+
+                        </div>
+
+                    </section>
+
+
+                    <section class="paso-formal separacion-formal">
+
+                        <span class="paso-numero">
+                            8
+                        </span>
+
+                        <div class="ancho-total">
+
+                            <h3>
+                                Transiciones del AFD
+                            </h3>
+
+
+                            <div class="transiciones">
+
+                                {% for t in automata.afd.transiciones_mostradas %}
+
+                                    <code>
+                                        δ({{ t.origen }},
+                                        {{ t.simbolo }})
+                                        =
+                                        {{ t.destino }}
+                                    </code>
+
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <section class="paso-formal separacion-formal">
+
+                        <span class="paso-numero">
+                            9
+                        </span>
+
+                        <div class="ancho-total">
+
+                            <h3>
+                                Quíntupla
+                            </h3>
+
+
+                            <div class="quintupla">
+
+                                <div class="quintupla-fila">
+
+                                    <strong>Q</strong>
+
+                                    <code>
+                                        {{ automata.afd.quintupla.Q }}
+                                    </code>
+
+                                </div>
+
+
+                                <div class="quintupla-fila">
+
+                                    <strong>Σ</strong>
+
+                                    <code>
+                                        {{ automata.afd.quintupla.Sigma }}
+                                    </code>
+
+                                </div>
+
+
+                                <div class="quintupla-fila">
+
+                                    <strong>q0</strong>
+
+                                    <code>
+                                        {{ automata.afd.quintupla.q0 }}
+                                    </code>
+
+                                </div>
+
+
+                                <div class="quintupla-fila">
+
+                                    <strong>F</strong>
+
+                                    <code>
+                                        {{ automata.afd.quintupla.F }}
+                                    </code>
+
+                                </div>
+
+
+                                <div class="quintupla-fila valor-largo">
+
+                                    <strong>δ</strong>
+
+                                    <div>
+
+                                        {% for t in automata.afd.quintupla.delta %}
+
+                                            <code>
+                                                {{ t }}
+                                            </code>
+
+                                        {% endfor %}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
 
                 </div>
 
-            </div>
+            </details>
 
+            {% endfor %}
 
-            <div class="lista-automatas">
+        </div>
 
-                {% for automata in automatas %}
+    </section>
 
-                <details class="automata-card">
+    {% endif %}
 
-                    <summary class="resumen-automata">
 
-                        <span>
-                            {{ automata.token }}
-                        </span>
+    <footer>
 
-                        <code>
-                            {{ automata.expresion }}
-                        </code>
+        <div class="flujo">
 
-                        <span class="ver">
-                            Ver desarrollo
-                        </span>
+            Entrada
+            →
+            Léxico
+            →
+            Sintaxis
+            →
+            ER
+            →
+            AFND
+            →
+            AFD
+            →
+            Tabla
+            →
+            Transiciones
+            →
+            Quíntupla
 
-                    </summary>
+        </div>
 
+    </footer>
 
-                    <div class="contenido-automata">
-
-
-                        <section class="paso-formal">
-
-                            <span class="paso-numero">
-                                4
-                            </span>
-
-                            <div>
-
-                                <h3>
-                                    Expresión regular
-                                </h3>
-
-                                <p>
-                                    <strong>
-                                        Lexema de ejemplo:
-                                    </strong>
-
-                                    <code>
-                                        {{ automata.ejemplo }}
-                                    </code>
-                                </p>
-
-                                <p>
-                                    <strong>Token:</strong>
-                                    {{ automata.token }}
-                                </p>
-
-                                <p>
-                                    <strong>ER:</strong>
-
-                                    <code>
-                                        {{ automata.expresion }}
-                                    </code>
-                                </p>
-
-                            </div>
-
-                        </section>
-
-
-                        <section class="paso-formal separacion-formal">
-
-                            <span class="paso-numero">
-                                5
-                            </span>
-
-                            <div class="ancho-total">
-
-                                <h3>
-                                    Autómata Finito No Determinista
-                                    (AFND)
-                                </h3>
-
-                                <p>
-                                    El AFND representa la expresión regular
-                                    utilizando estados y transiciones.
-                                    Puede contener transiciones epsilon
-                                    y diferentes caminos posibles.
-                                </p>
-
-                                <p>
-                                    Cada transición del autómata consume
-                                    símbolos del alfabeto.
-                                </p>
-
-                                <p>
-                                    <strong>Estado inicial:</strong>
-                                    {{ automata.afnd.inicial }}
-
-                                    ·
-
-                                    <strong>
-                                        Estado final:
-                                    </strong>
-
-                                    {{ automata.afnd.finales|join(', ') }}
-                                </p>
-
-
-                                <div class="grafico-contenedor">
-
-                                    {{ automata.afnd.svg|safe }}
-
-                                </div>
-
-
-                                <h4>
-                                    Transiciones del AFND
-                                </h4>
-
-
-                                <div class="transiciones">
-
-                                    {% for t in automata.afnd.transiciones_mostradas %}
-
-                                        <code>
-                                            {{ t.origen }}
-                                            -- {{ t.simbolo }} --&gt;
-                                            {{ t.destino }}
-                                        </code>
-
-                                    {% endfor %}
-
-                                </div>
-
-                            </div>
-
-                        </section>
-
-
-                        <section class="paso-formal separacion-formal">
-
-                            <span class="paso-numero">
-                                6
-                            </span>
-
-                            <div class="ancho-total">
-
-                                <h3>
-                                    Conversión de AFND a AFD
-                                </h3>
-
-                                <p>
-                                    A partir del AFND se obtiene
-                                    su autómata finito determinista.
-                                    Cada estado del AFD puede representar
-                                    un conjunto de estados del AFND.
-                                </p>
-
-
-                                <div class="equivalencias">
-
-                                    {% for eq in automata.afd.equivalencias %}
-
-                                        <code>
-                                            {{ eq.afd }}
-                                            =
-                                            {
-                                            {{ eq.afnd|join(', ') }}
-                                            }
-                                        </code>
-
-                                    {% endfor %}
-
-                                </div>
-
-                            </div>
-
-                        </section>
-
-
-                        <section class="paso-formal separacion-formal">
-
-                            <span class="paso-numero">
-                                7
-                            </span>
-
-                            <div class="ancho-total">
-
-                                <h3>
-                                    AFD y tabla de transición
-                                </h3>
-
-
-                                <div class="grafico-contenedor">
-
-                                    {{ automata.afd.svg|safe }}
-
-                                </div>
-
-
-                                <div class="tabla-scroll">
-
-                                    <table class="tabla-afd">
-
-                                        <thead>
-
-                                            <tr>
-
-                                                <th>
-                                                    Estado
-                                                </th>
-
-                                                {% for columna in automata.afd.columnas %}
-
-                                                    <th>
-                                                        {{ columna }}
-                                                    </th>
-
-                                                {% endfor %}
-
-                                            </tr>
-
-                                        </thead>
-
-
-                                        <tbody>
-
-                                            {% for fila in automata.afd.tabla %}
-
-                                            <tr>
-
-                                                <td class="estado-tabla">
-
-                                                    {% if fila.inicial %}
-                                                        →
-                                                    {% endif %}
-
-                                                    {% if fila.final %}
-                                                        *
-                                                    {% endif %}
-
-                                                    {{ fila.estado }}
-
-                                                </td>
-
-
-                                                {% for destino in fila.destinos %}
-
-                                                    <td>
-                                                        {{ destino }}
-                                                    </td>
-
-                                                {% endfor %}
-
-                                            </tr>
-
-                                            {% endfor %}
-
-                                        </tbody>
-
-                                    </table>
-
-                                </div>
-
-
-                                <p class="leyenda-estados">
-                                    → estado inicial ·
-                                    * estado final ·
-                                    — transición no definida
-                                </p>
-
-                            </div>
-
-                        </section>
-
-
-                        <section class="paso-formal separacion-formal">
-
-                            <span class="paso-numero">
-                                8
-                            </span>
-
-                            <div class="ancho-total">
-
-                                <h3>
-                                    Transiciones del AFD
-                                </h3>
-
-
-                                <div class="transiciones">
-
-                                    {% for t in automata.afd.transiciones_mostradas %}
-
-                                        <code>
-                                            δ({{ t.origen }},
-                                            {{ t.simbolo }})
-                                            =
-                                            {{ t.destino }}
-                                        </code>
-
-                                    {% endfor %}
-
-                                </div>
-
-                            </div>
-
-                        </section>
-
-
-                        <section class="paso-formal separacion-formal">
-
-                            <span class="paso-numero">
-                                9
-                            </span>
-
-                            <div class="ancho-total">
-
-                                <h3>
-                                    Quíntupla del AFD
-                                </h3>
-
-
-                                <div class="quintupla">
-
-                                    <div class="quintupla-fila">
-
-                                        <strong>Q</strong>
-
-                                        <code>
-                                            {{ automata.afd.quintupla.Q }}
-                                        </code>
-
-                                    </div>
-
-
-                                    <div class="quintupla-fila">
-
-                                        <strong>Σ</strong>
-
-                                        <code>
-                                            {{ automata.afd.quintupla.Sigma }}
-                                        </code>
-
-                                    </div>
-
-
-                                    <div class="quintupla-fila">
-
-                                        <strong>q0</strong>
-
-                                        <code>
-                                            {{ automata.afd.quintupla.q0 }}
-                                        </code>
-
-                                    </div>
-
-
-                                    <div class="quintupla-fila">
-
-                                        <strong>F</strong>
-
-                                        <code>
-                                            {{ automata.afd.quintupla.F }}
-                                        </code>
-
-                                    </div>
-
-
-                                    <div class="quintupla-fila valor-largo">
-
-                                        <strong>δ</strong>
-
-                                        <div>
-
-                                            {% for t in automata.afd.quintupla.delta %}
-
-                                                <code>
-                                                    {{ t }}
-                                                </code>
-
-                                            {% endfor %}
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </section>
-
-                    </div>
-
-                </details>
-
-                {% endfor %}
-
-            </div>
-
-        </section>
-
-        {% endif %}
-
-
-        <footer>
-
-            <div class="flujo">
-
-                1 Entrada
-                →
-                2 Léxico
-                →
-                3 Sintaxis
-                →
-                4 ER
-                →
-                5 AFND
-                →
-                6 AFD
-                →
-                7 Tabla
-                →
-                8 Transiciones
-                →
-                9 Quíntupla
-
-            </div>
-
-        </footer>
-
-    </main>
+</main>
 
 </body>
 </html>
