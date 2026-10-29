@@ -1,34 +1,39 @@
 import re
 
-
-# Aquí definimos cada token junto con la expresión regular
-# que permite reconocerlo dentro de una cadena de pedido.
+# Cada regla asocia un tipo de token con la expresión regular
+# que reconoce ese elemento dentro del mini lenguaje.
 REGLAS_LEXICAS = [
-    ("PEDIDO", r"PEDIDO"),
-    ("CLIENTE", r"CLIENTE"),
-    ("PRODUCTO", r"PRODUCTO"),
-    ("CANTIDAD", r"CANTIDAD"),
-    ("PAGO", r"PAGO"),
+    ("KW_REGLA", r"REGLA"),
+    ("KW_SI", r"SI"),
+    ("KW_ENTONCES", r"ENTONCES"),
 
-    ("ID_PRODUCTO", r"PR[0-9]{3}"),
-    ("ID_PEDIDO", r"P[0-9]{3}"),
-    ("ID_CLIENTE", r"C[0-9]{3}"),
+    ("CAMPO", r"TOTAL|CANTIDAD"),
+    ("ACCION", r"AUTORIZAR|VALIDAR"),
+    ("DESTINO", r"SUPERVISOR|STOCK"),
 
+    ("ID_REGLA", r"R[0-9]{3}"),
+    ("OPERADOR", r">=|<=|>|<|="),
     ("NUMERO", r"[1-9][0-9]*"),
-
-    ("METODO_PAGO", r"EFECTIVO|TARJETA|YAPE|PLIN"),
 
     ("FIN", r";"),
 ]
 
 
-def identificar_token(lexema):
-    # Recorremos las reglas hasta encontrar una expresión
-    # que coincida completamente con el lexema recibido.
-    for token, expresion in REGLAS_LEXICAS:
+def tokenizar_cadena(texto):
+    # Separamos palabras, números, operadores y el punto y coma.
+    # Así no es obligatorio colocar espacios alrededor de cada símbolo.
+    patron = re.compile(
+        r">=|<=|>|<|=|;|[A-Za-z_][A-Za-z_0-9]*|[0-9]+|\S"
+    )
 
+    return patron.findall(texto)
+
+
+def identificar_token(lexema):
+    # Probamos el lexema contra cada regla hasta encontrar
+    # una coincidencia completa.
+    for token, expresion in REGLAS_LEXICAS:
         if re.fullmatch(expresion, lexema):
             return token, expresion
 
-    # Si ninguna regla coincide, el lexema no es reconocido.
     return "DESCONOCIDO", "No definida"
