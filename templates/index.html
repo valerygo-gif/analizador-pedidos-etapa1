@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analizador Léxico-Sintáctico de Reglas de Pedidos</title>
+    <title>Analizador Léxico-Sintáctico de un DSL de Reglas de Pedidos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
 </head>
 
@@ -21,7 +21,7 @@
             </p>
 
             <h1>
-                Analizador Léxico-Sintáctico de un Lenguaje de Reglas de Pedidos
+                Analizador Léxico-Sintáctico de un DSL de Reglas de Pedidos
             </h1>
 
             <p>
@@ -40,7 +40,7 @@
             <strong>Proyecto</strong>
 
             <p>
-                Mini lenguaje para definir y validar reglas
+                DSL para definir y validar reglas
                 relacionadas con el proceso de pedidos.
             </p>
         </div>
@@ -58,7 +58,7 @@
 
             <b>→</b>
 
-            <span>Regla</span>
+            <span>Regla DSL</span>
 
             <b>→</b>
 
@@ -91,7 +91,7 @@
                     <h2>Ingresar regla</h2>
 
                     <p>
-                        Escribe una regla o carga un archivo TXT.
+                        Escribe una regla del DSL o carga un archivo TXT.
                     </p>
                 </div>
 
@@ -101,7 +101,7 @@
             <form method="POST" enctype="multipart/form-data">
 
                 <label for="texto">
-                    Regla
+                    Regla DSL
                 </label>
 
                 <textarea
@@ -245,7 +245,7 @@
             {% else %}
 
                 <div class="vacio">
-                    Ingresa una regla para comenzar.
+                    Ingresa una regla del DSL para comenzar.
                 </div>
 
             {% endif %}
@@ -269,7 +269,7 @@
                 <h2>Análisis sintáctico</h2>
 
                 <p>
-                    Verificación de la estructura de la regla.
+                    Verificación de la estructura según la gramática del DSL.
                 </p>
             </div>
 
@@ -331,7 +331,7 @@ Destino: {{ sintaxis.representacion.accion.destino }}</pre>
                 </h2>
 
                 <p>
-                    Desarrollo de cada token.
+                    Desarrollo formal de los tokens del DSL.
                 </p>
             </div>
 
