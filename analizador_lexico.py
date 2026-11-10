@@ -13,7 +13,7 @@ REGLAS_LEXICAS = [
 
     ("ID_REGLA", r"R[0-9]{3}"),
     ("OPERADOR", r">=|<=|>|<|="),
-    ("NUMERO", r"[1-9][0-9]*"),
+    ("NUMERO", r"[0-9]+"),
 
     ("FIN", r";"),
 ]
@@ -37,3 +37,18 @@ def identificar_token(lexema):
             return token, expresion
 
     return "DESCONOCIDO", "No definida"
+
+# Listas explícitas para distinguir los LEXEMAS encontrados de los lexemas
+# admitidos por un TOKEN, tal como indicó el profesor.
+LEXEMAS_ADMITIDOS = {
+    "KW_REGLA": "REGLA",
+    "KW_SI": "SI",
+    "KW_ENTONCES": "ENTONCES",
+    "CAMPO": "TOTAL, CANTIDAD",
+    "ACCION": "AUTORIZAR, VALIDAR",
+    "DESTINO": "SUPERVISOR, STOCK",
+    "ID_REGLA": "R seguido de tres dígitos (ej.: R001, R250)",
+    "OPERADOR": ">=, <=, >, <, =",
+    "NUMERO": "0, 1, 2, ..., 9, 10, 5000, ...",
+    "FIN": ";",
+}

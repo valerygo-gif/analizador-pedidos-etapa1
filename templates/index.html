@@ -13,7 +13,7 @@
 
     <header class="cabecera">
 
-        <div class="icono-principal">⚙️</div>
+        <div class="icono-principal" aria-hidden="true">TC</div>
 
         <div>
             <p class="etapa">
@@ -34,7 +34,7 @@
 
     <section class="tarjeta proyecto">
 
-        <div class="icono-proyecto">💻</div>
+        <div class="icono-proyecto" aria-hidden="true">DSL</div>
 
         <div>
             <strong>Proyecto</strong>
@@ -70,10 +70,9 @@
 
             <b>→</b>
 
-            <span>Sistema de pedidos</span>
+            <span>Integración futura al sistema de pedidos</span>
 
         </div>
-
     </section>
 
 
@@ -130,7 +129,7 @@
 
 
                 <button type="submit">
-                    🔎 Analizar regla
+                    Analizar reglas
                 </button>
 
             </form>
@@ -139,13 +138,11 @@
             <div class="ejemplo">
 
                 <strong>
-                    💡 Ejemplo
+                    Ejemplos del lenguaje
                 </strong>
 
-                <code>
-                    REGLA R001 SI TOTAL &gt; 5000
-                    ENTONCES AUTORIZAR SUPERVISOR ;
-                </code>
+                <code>REGLA R001 SI TOTAL &gt; 5000 ENTONCES AUTORIZAR SUPERVISOR ;</code>
+                <code>REGLA R002 SI CANTIDAD &gt;= 100 ENTONCES VALIDAR STOCK ;</code>
 
             </div>
 
@@ -176,13 +173,13 @@
                 {% if tiene_errores_lexicos %}
 
                     <div class="mensaje error">
-                        ✕ Se encontraron errores léxicos.
+                        Se encontraron errores léxicos.
                     </div>
 
                 {% else %}
 
                     <div class="mensaje exito">
-                        ✓ Análisis léxico correcto.
+                        Análisis léxico correcto.
                     </div>
 
                 {% endif %}
@@ -196,8 +193,9 @@
 
                             <tr>
                                 <th>N.º</th>
-                                <th>Lexema</th>
                                 <th>Token</th>
+                                <th>Lexema encontrado</th>
+                                <th>Otros lexemas / valores admitidos</th>
                                 <th>Expresión regular</th>
                             </tr>
 
@@ -215,12 +213,6 @@
                                     </td>
 
                                     <td>
-                                        <code>
-                                            {{ resultado.lexema }}
-                                        </code>
-                                    </td>
-
-                                    <td>
                                         <span class="token">
                                             {{ resultado.token }}
                                         </span>
@@ -228,8 +220,13 @@
 
                                     <td>
                                         <code>
-                                            {{ resultado.expresion }}
+                                            {{ resultado.lexema }}
                                         </code>
+                                    </td>
+
+                                    <td class="valores-admitidos">{{ lexemas_admitidos.get(resultado.token, "—") }}</td>
+                                    <td>
+                                        <code>{{ resultado.expresion }}</code>
                                     </td>
 
                                 </tr>
@@ -276,36 +273,65 @@
         </div>
 
 
+        <details class="gramatica-detalle">
+            <summary>Gramática utilizada por el analizador sintáctico</summary>
+            <pre>Programa → Regla Programa | Regla
+Regla → REGLA ID_REGLA SI CAMPO OPERADOR NUMERO ENTONCES ACCION DESTINO ;</pre>
+        </details>
+
         {% if sintaxis.valida %}
 
             <div class="mensaje exito">
-                ✓ Sintaxis correcta.
+                Sintaxis correcta.
             </div>
 
 
             <div class="representacion">
 
                 <h3>
-                    Representación obtenida
+                    Representación obtenida ({{ sintaxis.representaciones|length }} regla/s)
                 </h3>
-
-                <pre>ID REGLA: {{ sintaxis.representacion.id_regla }}
+                {% for regla in sintaxis.representaciones %}
+                <pre>ID REGLA: {{ regla.id_regla }}
 
 CONDICIÓN
-Campo: {{ sintaxis.representacion.condicion.campo }}
-Operador: {{ sintaxis.representacion.condicion.operador }}
-Valor: {{ sintaxis.representacion.condicion.valor }}
+Campo: {{ regla.condicion.campo }}
+Operador: {{ regla.condicion.operador }}
+Valor: {{ regla.condicion.valor }}
 
 ACCIÓN
-Tipo: {{ sintaxis.representacion.accion.tipo }}
-Destino: {{ sintaxis.representacion.accion.destino }}</pre>
+Tipo: {{ regla.accion.tipo }}
+Destino: {{ regla.accion.destino }}</pre>
+                <h4 class="subtitulo-arbol">Árbol de estructura sintáctica — {{ regla.id_regla }}</h4>
+                <div class="arbol-regla" role="group" aria-label="Estructura de la regla {{ regla.id_regla }}">
+                    <div class="arbol-raiz">Regla</div>
+                    <div class="arbol-rama">
+                        <div class="arbol-nodo arbol-id">Identificador<br><code>{{ regla.id_regla }}</code></div>
+                        <div class="arbol-nodo">
+                            <strong>Condición</strong>
+                            <div class="arbol-hojas">
+                                <span>Campo<br><code>{{ regla.condicion.campo }}</code></span>
+                                <span>Operador<br><code>{{ regla.condicion.operador }}</code></span>
+                                <span>Número<br><code>{{ regla.condicion.valor }}</code></span>
+                            </div>
+                        </div>
+                        <div class="arbol-nodo">
+                            <strong>Acción</strong>
+                            <div class="arbol-hojas">
+                                <span>Tipo<br><code>{{ regla.accion.tipo }}</code></span>
+                                <span>Destino<br><code>{{ regla.accion.destino }}</code></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
 
             </div>
 
         {% else %}
 
             <div class="mensaje error">
-                ✕ {{ sintaxis.mensaje }}
+                {{ sintaxis.mensaje }}
             </div>
 
         {% endif %}
@@ -425,6 +451,12 @@ Destino: {{ sintaxis.representacion.accion.destino }}</pre>
                             </p>
 
 
+                            <div class="herramientas-grafico">
+                                <button type="button" class="control-grafico" data-escala="ajustar">Ajustar</button>
+                                <button type="button" class="control-grafico" data-escala="ampliar">Ampliar</button>
+                                <button type="button" class="control-grafico" data-escala="reducir">Reducir</button>
+                                <button type="button" class="control-grafico" data-escala="original">Tamaño real</button>
+                            </div>
                             <div class="grafico-contenedor">
 
                                 {{ automata.afnd.svg|safe }}
@@ -503,6 +535,12 @@ Destino: {{ sintaxis.representacion.accion.destino }}</pre>
                             </h3>
 
 
+                            <div class="herramientas-grafico">
+                                <button type="button" class="control-grafico" data-escala="ajustar">Ajustar</button>
+                                <button type="button" class="control-grafico" data-escala="ampliar">Ampliar</button>
+                                <button type="button" class="control-grafico" data-escala="reducir">Reducir</button>
+                                <button type="button" class="control-grafico" data-escala="original">Tamaño real</button>
+                            </div>
                             <div class="grafico-contenedor">
 
                                 {{ automata.afd.svg|safe }}
@@ -719,29 +757,48 @@ Destino: {{ sintaxis.representacion.accion.destino }}</pre>
 
         <div class="flujo">
 
-            Entrada
-            →
-            Léxico
-            →
-            Sintaxis
-            →
-            ER
-            →
-            AFND
-            →
-            AFD
-            →
-            Tabla
-            →
-            Transiciones
-            →
-            Quíntupla
+            Construcción del reconocedor: ER → AFND → AFD
+            <br class="salto-flujo">
+            Análisis de reglas: Entrada → Léxico (tokens) → Sintaxis → Resultado
 
         </div>
 
     </footer>
 
 </main>
+
+<script>
+(function () {
+    // Cada diagrama permanece completo en el DOM; el usuario controla su escala.
+    function ajustar(bloque, modo) {
+        const marco = bloque.nextElementSibling;
+        const svg = marco && marco.querySelector('svg.grafico-automata');
+        if (!svg) return;
+        const natural = Number(svg.dataset.ancho || svg.getAttribute('width'));
+        const disponible = Math.max(250, marco.clientWidth - 26);
+        const actual = Number(svg.dataset.factor || 1);
+        let factor = actual;
+        if (modo === 'ajustar') factor = Math.min(1, disponible / natural);
+        if (modo === 'original') factor = 1;
+        if (modo === 'ampliar') factor = Math.min(2.4, actual * 1.35);
+        if (modo === 'reducir') factor = Math.max(0.15, actual / 1.35);
+        svg.dataset.factor = factor;
+        svg.style.width = (natural * factor) + 'px';
+        svg.style.height = 'auto';
+    }
+    document.querySelectorAll('.herramientas-grafico').forEach(bloque => {
+        bloque.addEventListener('click', ev => {
+            const btn = ev.target.closest('button[data-escala]');
+            if (btn) ajustar(bloque, btn.dataset.escala);
+        });
+        // details suele estar cerrado: ajustar al abrirlo, cuando el ancho es medible.
+        const detalle = bloque.closest('details');
+        if (detalle) detalle.addEventListener('toggle', () => {
+            if (detalle.open) ajustar(bloque, 'ajustar');
+        });
+    });
+})();
+</script>
 
 </body>
 </html>

@@ -250,11 +250,10 @@ def construir_afnd(token, expresion):
     arbol = parser.parsear()
     constructor = ConstructorAFND()
 
-    nucleo_inicio, nucleo_fin = constructor.construir(arbol)
-
-    # Envolvemos el núcleo con transiciones epsilon para que la representación
-    # del AFND sea explícitamente no determinista y luego pueda convertirse a AFD.
+    # El estado inicial se reserva ANTES de generar el núcleo.
+    # Así cada AFND independiente comienza siempre en q0.
     inicio = constructor.nuevo_estado()
+    nucleo_inicio, nucleo_fin = constructor.construir(arbol)
     fin = constructor.nuevo_estado()
     constructor.agregar_transicion(inicio, EPSILON, nucleo_inicio)
     constructor.agregar_transicion(nucleo_fin, EPSILON, fin)
@@ -266,7 +265,7 @@ def construir_afnd(token, expresion):
         if t["simbolo"] != EPSILON
     })
 
-    return {
+    afnd = {
         "tipo": "AFND",
         "token": token,
         "expresion": expresion,
@@ -276,6 +275,20 @@ def construir_afnd(token, expresion):
         "inicial": inicio,
         "finales": [fin],
     }
+    # Para la exposición: numeración consecutiva en el orden visual
+    # (izquierda a derecha y, por nivel, de arriba abajo).
+    niveles = calcular_niveles(afnd)
+    orden = sorted(estados, key=lambda e: (niveles[e], int(e[1:])))
+    nombres = {e: f"q{i}" for i, e in enumerate(orden)}
+    afnd["estados"] = [nombres[e] for e in orden]
+    afnd["inicial"] = nombres[inicio]
+    afnd["finales"] = [nombres[fin]]
+    afnd["transiciones"] = [
+        {"origen": nombres[t["origen"]], "simbolo": t["simbolo"],
+         "destino": nombres[t["destino"]]}
+        for t in constructor.transiciones
+    ]
+    return afnd
 
 
 def cierre_epsilon(estados, transiciones):
@@ -448,124 +461,179 @@ def calcular_niveles(automata):
     return niveles
 
 
-def generar_svg(automata, identificador):
-    transiciones = agrupar_transiciones(automata)
-    niveles = calcular_niveles(automata)
+def resumir_simbolos(simbolos):
+    """Muestra cada símbolo explícitamente, sin abreviar intervalos (0–9, a–z)."""
+    simbolos = set(simbolos)
+    ordenados = []
+    if EPSILON in simbolos:
+        ordenados.append(EPSILON)
+        simbolos.remove(EPSILON)
+    ordenados.extend(sorted(simbolos))
+    return ", ".join(ordenados)
 
+
+def generar_svg(automata, identificador):
+    """SVG íntegro: estado q0 a la izquierda, finales dobles, flechas y etiquetas visibles.
+
+    Todas las etiquetas muestran los símbolos uno por uno (por ejemplo,
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9), distribuidos en líneas cuando corresponde.
+    """
+    import re
+
+    def formato(valor):
+        return f"{valor:.1f}"
+
+    niveles = calcular_niveles(automata)
     por_nivel = defaultdict(list)
     for estado in automata["estados"]:
         por_nivel[niveles[estado]].append(estado)
-
     for estados in por_nivel.values():
         estados.sort(key=lambda e: int(e[1:]) if e[1:].isdigit() else e)
 
-    max_nivel = max(por_nivel.keys(), default=0)
-    max_por_nivel = max((len(v) for v in por_nivel.values()), default=1)
+    transiciones = defaultdict(set)
+    for t in automata["transiciones"]:
+        transiciones[(t["origen"], t["destino"])].add(t["simbolo"])
 
-    ancho = max(760, 160 + max_nivel * 145)
-    alto = max(260, 110 + max_por_nivel * 115)
-    centro_y = alto / 2
-
+    max_nivel = max(por_nivel, default=0)
+    max_por_nivel = max(map(len, por_nivel.values()), default=1)
+    # Separa automáticamente los estados según el ancho de sus etiquetas.
+    # Se muestran como máximo diez símbolos por línea, sin abreviar rangos.
+    max_caracteres = max(
+        (
+            len(", ".join(sorted(simbolos)[i:i + 10]))
+            for simbolos in transiciones.values()
+            for i in range(0, len(simbolos), 10)
+        ),
+        default=0,
+    )
+    paso_x = max(176, int(max_caracteres * 7.25 + 100))
+    paso_y = 152
+    margen_x = 115
+    margen_y = 110
+    ancho = margen_x * 2 + max_nivel * paso_x
+    alto = max(290, 2 * margen_y + (max_por_nivel - 1) * paso_y)
     posiciones = {}
+    centro_y = alto / 2
     for nivel in range(max_nivel + 1):
         estados = por_nivel.get(nivel, [])
-        if not estados:
-            continue
+        primer_y = centro_y - (len(estados) - 1) * paso_y / 2
+        for i, estado in enumerate(estados):
+            posiciones[estado] = (margen_x + nivel * paso_x, primer_y + i * paso_y)
 
-        separacion = 105
-        bloque = (len(estados) - 1) * separacion
-        inicio_y = centro_y - bloque / 2
-
-        for indice, estado in enumerate(estados):
-            posiciones[estado] = (90 + nivel * 145, inicio_y + indice * separacion)
-
+    identificador = re.sub(r"[^A-Za-z0-9_-]", "_", identificador)
     marker = f"flecha_{identificador}"
     partes = [
-        f'<svg class="grafico-automata" viewBox="0 0 {ancho} {alto}" role="img" aria-label="{escape(automata["tipo"])} de {escape(automata["token"])}">',
+        f'<svg class="grafico-automata" xmlns="http://www.w3.org/2000/svg" '
+        f'data-ancho="{ancho}" width="{ancho}" height="{alto}" viewBox="0 0 {ancho} {alto}" '
+        f'role="img" aria-label="{escape(automata["tipo"])} del token {escape(automata["token"])}">',
         '<defs>',
-        f'<marker id="{marker}" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">',
-        '<path d="M0,0 L0,6 L9,3 z" fill="#344054" />',
-        '</marker>',
-        '</defs>',
+        f'<marker id="{marker}" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">',
+        '<path d="M0,0 L9,3 L0,6 Z" fill="#344054" />',
+        '</marker></defs>',
     ]
+    # Entrada siempre visible y orientada desde la izquierda.
+    xi, yi = posiciones[automata["inicial"]]
+    partes.append(f'<path d="M {xi-80} {yi} L {xi-32} {yi}" stroke="#344054" '
+                  f'stroke-width="2" fill="none" marker-end="url(#{marker})"/>')
+    partes.append(f'<text x="{xi-75}" y="{yi-11}" font-size="12" fill="#475467">Inicio</text>')
 
-    # Flecha de inicio.
-    x0, y0 = posiciones[automata["inicial"]]
-    partes.append(
-        f'<line x1="{x0 - 58}" y1="{y0}" x2="{x0 - 31}" y2="{y0}" '
-        f'stroke="#344054" stroke-width="2" marker-end="url(#{marker})" />'
-    )
-    partes.append(
-        f'<text x="{x0 - 62}" y="{y0 - 10}" text-anchor="middle" font-size="12" fill="#667085">Inicio</text>'
-    )
-
-    for indice, transicion in enumerate(transiciones):
-        origen = transicion["origen"]
-        destino = transicion["destino"]
-        etiqueta = escape(transicion["simbolo"])
+    # Todas las transiciones se agrupan por PAR de estados, pero preservan todos los símbolos.
+    for idx, ((origen, destino), simbolos) in enumerate(transiciones.items()):
         x1, y1 = posiciones[origen]
         x2, y2 = posiciones[destino]
-
+        etiqueta = resumir_simbolos(simbolos)
+        texto = escape(etiqueta)
+        completo = escape(", ".join(sorted(simbolos)))
         if origen == destino:
-            partes.append(
-                f'<path d="M {x1 - 18} {y1 - 24} C {x1 - 55} {y1 - 72}, {x1 + 55} {y1 - 72}, {x1 + 18} {y1 - 24}" '
-                f'fill="none" stroke="#344054" stroke-width="2" marker-end="url(#{marker})" />'
-            )
-            partes.append(
-                f'<text x="{x1}" y="{y1 - 76}" text-anchor="middle" font-size="12" fill="#101828">{etiqueta}</text>'
-            )
-            continue
-
-        radio = 25
-        dx = x2 - x1
-        dy = y2 - y1
-        distancia = max(math.hypot(dx, dy), 1)
-        ux, uy = dx / distancia, dy / distancia
-        sx, sy = x1 + ux * radio, y1 + uy * radio
-        ex, ey = x2 - ux * 31, y2 - uy * 31
-
-        if x2 > x1:
-            partes.append(
-                f'<line x1="{sx}" y1="{sy}" x2="{ex}" y2="{ey}" '
-                f'stroke="#344054" stroke-width="2" marker-end="url(#{marker})" />'
-            )
-            tx = (sx + ex) / 2
-            ty = (sy + ey) / 2 - 8
+            # Bucle con etiqueta encima; se deja margen para que no se recorte.
+            x, y = x1, y1
+            partes.append(f'<g><title>{completo}</title><path '
+                          f'd="M {x-18} {y-25} C {x-55} {y-89}, {x+55} {y-89}, {x+18} {y-25}" '
+                          f'fill="none" stroke="#344054" stroke-width="2" '
+                          f'marker-end="url(#{marker})" />')
+            tx, ty = x, y-87
         else:
-            curvatura = 55 + (indice % 3) * 16
-            cx1 = sx + 45
-            cy1 = sy - curvatura
-            cx2 = ex - 45
-            cy2 = ey - curvatura
-            partes.append(
-                f'<path d="M {sx} {sy} C {cx1} {cy1}, {cx2} {cy2}, {ex} {ey}" '
-                f'fill="none" stroke="#344054" stroke-width="2" marker-end="url(#{marker})" />'
-            )
-            tx = (sx + ex) / 2
-            ty = min(cy1, cy2) - 5
+            dx, dy = x2-x1, y2-y1
+            distancia = max(math.hypot(dx,dy), 1)
+            ux, uy = dx/distancia, dy/distancia
+            sx, sy = x1+ux*29, y1+uy*29
+            ex, ey = x2-ux*35, y2-uy*35
+            # Desviación para flechas inversas o dos caminos entre iguales niveles.
+            reversa = (destino, origen) in transiciones
+            if x2 > x1 and not reversa:
+                camino = f"M {formato(sx)} {formato(sy)} L {formato(ex)} {formato(ey)}"
+                tx, ty = (sx+ex)/2, (sy+ey)/2-12
+            else:
+                # Si hay dos flechas en sentidos opuestos, separarlas por
+                # lados distintos evita ocultar símbolos y etiquetas.
+                desplazamiento = -100 if (x2 > x1 and reversa) else 100
+                controlx=(sx+ex)/2
+                controly=(sy+ey)/2+desplazamiento
+                camino=(f"M {formato(sx)} {formato(sy)} Q "
+                        f"{formato(controlx)} {formato(controly)} {formato(ex)} {formato(ey)}")
+                tx, ty = (sx+2*controlx+ex)/4, (sy+2*controly+ey)/4-12
+            partes.append(f'<g><title>{completo}</title><path d="{camino}" fill="none" '
+                          f'stroke="#344054" stroke-width="2" marker-end="url(#{marker})"/>')
+        # Rectángulo blanco dimensionado según el texto, para impedir superposiciones.
+        # Cortes solo entre símbolos: nunca parten una etiqueta por la mitad.
+        elementos = etiqueta.split(", ")
+        lineas = [", ".join(elementos[i:i + 10])
+                  for i in range(0, len(elementos), 10)] or [""]
+        maxlen = max(map(len,lineas))
+        caja_ancho = max(30, maxlen*7.25+15)
+        caja_alto = len(lineas)*16+8
+        partes.append(f'<rect x="{formato(tx-caja_ancho/2)}" y="{formato(ty-caja_alto+8)}" '
+                      f'width="{formato(caja_ancho)}" height="{caja_alto}" rx="4" '
+                      f'fill="white" stroke="#d0d5dd" stroke-width="0.5"/>')
+        for lin, linea in enumerate(lineas):
+            partes.append(f'<text x="{formato(tx)}" y="{formato(ty-(len(lineas)-1-lin)*16)}" '
+                          f'text-anchor="middle" font-size="12" fill="#101828">{escape(linea)}</text>')
+        partes.append('</g>')
 
-        partes.append(
-            f'<rect x="{tx - 34}" y="{ty - 13}" width="68" height="18" rx="4" fill="white" opacity="0.92" />'
-        )
-        partes.append(
-            f'<text x="{tx}" y="{ty}" text-anchor="middle" font-size="11" fill="#101828">{etiqueta}</text>'
-        )
-
+    # Estados se dibujan AL FINAL para que las flechas no atraviesen los círculos.
     for estado in automata["estados"]:
-        x, y = posiciones[estado]
-        final = estado in automata["finales"]
-
-        partes.append(
-            f'<circle cx="{x}" cy="{y}" r="25" fill="#ffffff" stroke="#4f46e5" stroke-width="2" />'
-        )
-        if final:
-            partes.append(
-                f'<circle cx="{x}" cy="{y}" r="20" fill="none" stroke="#4f46e5" stroke-width="2" />'
-            )
-
-        partes.append(
-            f'<text x="{x}" y="{y + 4}" text-anchor="middle" font-size="12" font-weight="700" fill="#111827">{escape(estado)}</text>'
-        )
-
+        x,y=posiciones[estado]
+        partes.append(f'<circle cx="{x}" cy="{formato(y)}" r="28" '
+                      'fill="#fff" stroke="#4f46e5" stroke-width="2.2"/>')
+        if estado in automata["finales"]:
+            partes.append(f'<circle cx="{x}" cy="{formato(y)}" r="22.5" '
+                          'fill="none" stroke="#4f46e5" stroke-width="2"/>')
+        partes.append(f'<text x="{x}" y="{formato(y+5)}" text-anchor="middle" '
+                      f'font-size="13" font-weight="700" fill="#111827">{escape(estado)}</text>')
     partes.append('</svg>')
     return "".join(partes)
+
+
+def exportar_jflap(automata):
+    """Exporta el AFND o AFD a formato .jff para contrastarlo en JFLAP.
+
+    Conserva las transiciones sin agrupar; las epsilon usan <read />.
+    """
+    import xml.etree.ElementTree as ET
+    raiz = ET.Element("structure")
+    ET.SubElement(raiz, "type").text = "fa"
+    cuerpo = ET.SubElement(raiz, "automaton")
+    niveles = calcular_niveles(automata)
+    por_nivel = defaultdict(list)
+    for estado in automata["estados"]:
+        por_nivel[niveles[estado]].append(estado)
+    for nivel, estados in sorted(por_nivel.items()):
+        for fila, nombre in enumerate(estados):
+            nodo = ET.SubElement(cuerpo, "state", {
+                "id": nombre[1:], "name": nombre,
+            })
+            ET.SubElement(nodo, "x").text = str(110 + nivel * 155)
+            ET.SubElement(nodo, "y").text = str(120 + fila * 115)
+            if nombre == automata["inicial"]:
+                ET.SubElement(nodo, "initial")
+            if nombre in automata["finales"]:
+                ET.SubElement(nodo, "final")
+    for t in automata["transiciones"]:
+        trans = ET.SubElement(cuerpo, "transition")
+        ET.SubElement(trans, "from").text = t["origen"][1:]
+        ET.SubElement(trans, "to").text = t["destino"][1:]
+        ET.SubElement(trans, "read").text = (
+            None if t["simbolo"] == EPSILON else t["simbolo"]
+        )
+    ET.indent(raiz, space="  ")
+    return ET.tostring(raiz, encoding="utf-8", xml_declaration=True)

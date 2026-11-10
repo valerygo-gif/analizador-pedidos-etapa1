@@ -557,8 +557,8 @@ pre {
 }
 
 .grafico-automata {
-    min-width: 700px;
-    width: 100%;
+    display: block;
+    max-width: none;
     height: auto;
 }
 
@@ -718,3 +718,40 @@ footer {
     }
 
 }
+/* Ajustes mínimos: símbolos completos, controles sobrios, y sin emojis. */
+.icono-principal { font-size: 22px; font-weight: 800; letter-spacing: .07em; }
+.icono-proyecto { font-size: 15px; font-weight: 800; color: #4338ca; min-width: 42px; }
+.valores-admitidos { color: #475467; font-size: 12px; min-width: 150px; }
+.nota-ejemplo { color: #cbd5e1; font-size: 12px; line-height: 1.5; margin-bottom: 0; }
+.ejemplo code + code { margin-top: 7px; }
+.herramientas-grafico { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.control-grafico {
+    width: auto; margin: 0; padding: 7px 12px; border-radius: 8px;
+    font-size: 12px; color: #3730a3; background: #eef2ff;
+    border: 1px solid #c7d2fe; box-shadow: none;
+}
+.control-grafico:hover { transform: none; box-shadow: none; background: #e0e7ff; }
+.nota-diagrama { color: #475467; font-size: 12px; }
+.gramatica-detalle { margin: 18px 0; padding: 12px 14px; border: 1px solid #dbe4ff; border-radius: 10px; }
+.gramatica-detalle summary { cursor: pointer; font-weight: 700; color: #3730a3; }
+.gramatica-detalle pre { white-space: pre-wrap; word-break: break-word; line-height: 1.6; }
+.gramatica-detalle p { font-size: 12px; color: #667085; }
+.salto-flujo { display: block; }
+
+.aclaracion-contexto { margin-top: 14px; color: #667085; font-size: 13px; line-height: 1.65; }
+.subtitulo-arbol { margin-bottom: 12px; font-size: 14px; color: #344054; }
+.arbol-regla { overflow-x: auto; padding: 10px 0 0; }
+.arbol-raiz { width: max-content; margin: 0 auto 22px; padding: 8px 30px;
+    border-radius: 9px; border: 2px solid #6366f1; background: #eef2ff;
+    color: #312e81; font-weight: 800; position: relative; }
+.arbol-raiz::after { content: ''; position: absolute; top: 100%; left: 50%;
+    width: 2px; height: 22px; background: #94a3b8; }
+.arbol-rama { display: flex; align-items: stretch; justify-content: center;
+    gap: 12px; min-width: 560px; }
+.arbol-nodo { flex: 1; padding: 12px; text-align: center; border: 1px solid #c7d2fe;
+    border-radius: 10px; background: #f8faff; color: #344054; font-size: 13px; }
+.arbol-id { flex: .7; }
+.arbol-hojas { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+.arbol-hojas > span { flex: 1; min-width: 65px; padding: 8px; border: 1px solid #e5e7eb;
+    border-radius: 8px; background: #fff; font-size: 11px; line-height: 1.8; }
+.arbol-hojas code, .arbol-nodo code { font-weight: 700; color: #3730a3; overflow-wrap: anywhere; }

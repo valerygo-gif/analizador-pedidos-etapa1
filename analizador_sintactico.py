@@ -1,108 +1,60 @@
+# Gramática de la fase actual (los valores son tokens del análisis léxico):
+# Programa -> Regla Programa | Regla
+# Regla -> KW_REGLA ID_REGLA KW_SI CAMPO OPERADOR NUMERO
+#          KW_ENTONCES ACCION DESTINO FIN
+# Esta fase verifica estructura; NO interpreta ni ejecuta reglas comerciales.
 SECUENCIA_ESPERADA = [
-    "KW_REGLA",
-    "ID_REGLA",
-    "KW_SI",
-    "CAMPO",
-    "OPERADOR",
-    "NUMERO",
-    "KW_ENTONCES",
-    "ACCION",
-    "DESTINO",
-    "FIN",
+    "KW_REGLA", "ID_REGLA", "KW_SI", "CAMPO", "OPERADOR", "NUMERO",
+    "KW_ENTONCES", "ACCION", "DESTINO", "FIN",
 ]
 
 
 def analizar_sintaxis(resultados):
-    # Si existe un lexema desconocido no podemos continuar
-    # con el análisis sintáctico.
     for resultado in resultados:
         if resultado["token"] == "DESCONOCIDO":
             return {
                 "valida": False,
-                "mensaje":
-                    "No se puede validar la sintaxis porque "
-                    "existe al menos un error léxico.",
+                "mensaje": "No se puede validar la sintaxis: hay al menos un lexema no reconocido.",
                 "representacion": None,
+                "representaciones": [],
             }
 
-    tokens = [
-        resultado["token"]
-        for resultado in resultados
-    ]
+    if not resultados:
+        return {"valida": False, "mensaje": "Escribe al menos una regla.",
+                "representacion": None, "representaciones": []}
 
-    # Comparamos la secuencia encontrada con la estructura
-    # definida para nuestro mini lenguaje.
-    if tokens != SECUENCIA_ESPERADA:
-
-        limite = min(
-            len(tokens),
-            len(SECUENCIA_ESPERADA)
-        )
-
-        for indice in range(limite):
-
-            if tokens[indice] != SECUENCIA_ESPERADA[indice]:
-
-                posicion = indice + 1
-
+    tokens = [r["token"] for r in resultados]
+    representaciones = []
+    longitud = len(SECUENCIA_ESPERADA)
+    for comienzo in range(0, len(tokens), longitud):
+        fragmento = tokens[comienzo:comienzo+longitud]
+        for indice, esperado in enumerate(SECUENCIA_ESPERADA):
+            if indice >= len(fragmento):
                 return {
                     "valida": False,
-                    "mensaje": (
-                        f"Error sintáctico en la posición "
-                        f"{posicion}: se esperaba "
-                        f"{SECUENCIA_ESPERADA[indice]} "
-                        f"y se encontró {tokens[indice]}."
-                    ),
-                    "representacion": None,
+                    "mensaje": (f"Regla {comienzo//longitud+1} incompleta: "
+                                f"en la posición {comienzo+indice+1} falta {esperado}."),
+                    "representacion": None, "representaciones": [],
+                }
+            if fragmento[indice] != esperado:
+                return {
+                    "valida": False,
+                    "mensaje": (f"Error sintáctico en posición {comienzo+indice+1}: "
+                                f"se esperaba {esperado}, se encontró {fragmento[indice]}."),
+                    "representacion": None, "representaciones": [],
                 }
 
-        if len(tokens) < len(SECUENCIA_ESPERADA):
-
-            return {
-                "valida": False,
-                "mensaje": (
-                    "La regla está incompleta. "
-                    f"Falta al menos el token "
-                    f"{SECUENCIA_ESPERADA[len(tokens)]}."
-                ),
-                "representacion": None,
-            }
-
-        return {
-            "valida": False,
-            "mensaje":
-                "La regla contiene elementos adicionales "
-                "que no forman parte de la gramática definida.",
-            "representacion": None,
-        }
-
-    lexemas = [
-        resultado["lexema"]
-        for resultado in resultados
-    ]
-
-    # Después de validar la regla organizamos su información.
-    # Esta es una representación intermedia, todavía no es
-    # la traducción final de un compilador completo.
-    representacion = {
-        "id_regla": lexemas[1],
-
-        "condicion": {
-            "campo": lexemas[3],
-            "operador": lexemas[4],
-            "valor": lexemas[5],
-        },
-
-        "accion": {
-            "tipo": lexemas[7],
-            "destino": lexemas[8],
-        },
-    }
+        lexemas = [r["lexema"] for r in resultados[comienzo:comienzo+longitud]]
+        representaciones.append({
+            "id_regla": lexemas[1],
+            "condicion": {"campo": lexemas[3], "operador": lexemas[4],
+                          "valor": lexemas[5]},
+            "accion": {"tipo": lexemas[7], "destino": lexemas[8]},
+        })
 
     return {
         "valida": True,
-        "mensaje":
-            "Sintaxis correcta: la regla cumple "
-            "la estructura definida por el mini lenguaje.",
-        "representacion": representacion,
+        "mensaje": f"Sintaxis correcta: {len(representaciones)} regla(s) válidas.",
+        "representacion": representaciones[0],
+        "representaciones": representaciones,
     }

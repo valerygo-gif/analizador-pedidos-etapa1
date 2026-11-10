@@ -2,7 +2,8 @@ from flask import Flask, render_template, request
 
 from analizador_lexico import (
     identificar_token,
-    tokenizar_cadena
+    tokenizar_cadena,
+    LEXEMAS_ADMITIDOS
 )
 
 from analizador_sintactico import analizar_sintaxis
@@ -151,7 +152,8 @@ def inicio():
         automatas=automatas,
         texto=texto,
         tiene_errores_lexicos=tiene_errores_lexicos,
-        sintaxis=sintaxis
+        sintaxis=sintaxis,
+        lexemas_admitidos=LEXEMAS_ADMITIDOS,
     )
 
 
